@@ -1,0 +1,88 @@
+'''
+Created on Jul 19, 2018
+
+This is my implementation of Machine Learning using a .csv file of data
+given to me from Dr. Chien. 
+
+@author: ngiegerich
+'''
+from neuralNetwork import *
+
+import numpy as np
+import json
+import pandas as pd
+import requests
+import neuralNetwork
+
+
+def load_csv_data(file):
+    print("--------------------Loading in .csv file-------------------- ")
+    return pd.read_csv(file, encoding='utf-8', usecols=lambda x: x.upper() in ['NO','PCBH','HEATERL','PCBL','PCBT','PCBKXY','PCBKZ','RSPR','RID','RPCB','RPCBCOV'])
+
+tr_data = load_csv_data("TrainingData.csv")
+tr_data_feature = tr_data.loc[:, 'PCBH':'PCBKZ']
+tr_data_target = tr_data.loc[:, 'RSPR':'RPCBCOV']
+
+# Trying to scale the data 
+#tr_data_feature = tr_data_feature/np.amax(tr_data_feature, axis = 0)
+tr_data_target = tr_data_target/100
+
+
+
+
+total_tr, total_tr_features = np.shape(tr_data_feature)
+
+
+# Calculating the min, max, mean, median, and st.dev of the R_Spread
+minimum_rSpread = np.min(tr_data_target)
+maximum_rSpread = np.max(tr_data_target)
+mean_rSpread = np.mean(tr_data_target)
+median_rspread = np.median(tr_data_target)
+st_rSpread_dev = np.std(tr_data_target)
+
+
+# Printing out some basic info of the data that we are handling
+print("\n*******TRAINING DATA STATISTICS*******\n")
+print"\nTotal Amount of Training Data:", total_tr
+print "\nTotal Number of Features:", total_tr_features
+
+# Training the machine... 
+train_data = np.array(tr_data_feature)
+train_x_list = train_data.tolist()
+train_label = np.array(tr_data_target)
+train_label = train_label.reshape(len(tr_data_target),4)
+train_y_list = train_label.tolist()
+dataset =  list(zip(train_x_list,train_y_list))
+
+print "\nThe length of the dataset:",len(dataset)
+
+# More stats...
+print "\n -Minimum: ", minimum_rSpread
+print "\n -Maximum: ", maximum_rSpread
+print "\n -Mean: ", mean_rSpread
+print "\n -Median: ", median_rspread
+print "\n -St. Deviation: " , st_rSpread_dev
+
+print "\n ********CALLING NEURAL NETWORK********"
+
+# Creating a new neuralNetwork
+NN = NeuralNetwork()
+hidden_layer = NeuronLayer(input_num=6, neuron_num=10)
+#hidden_layer2 = NeuronLayer(input_num=10, neuron_num=10)
+output_layer = NeuronLayer(input_num=10, neuron_num=4)
+NN.add_layer(hidden_layer)
+#NN.add_layer(hidden_layer2)
+NN.add_layer(output_layer)
+NN.dump()
+
+
+print "\n**********WAIT FOR TRAINING TO COMPLETE!**********"
+print "\n              (It will print below)               "
+tracking = []
+for i in range(200):
+   NN.train(dataset)
+   tracking.append(NN.calculate_total_error(dataset))
+    
+    
+    
+print "\nNeuralNetwork 2-2-1, Expected output:[1.05+-0.2], Real output:",NN.get_output([0.25,0.3,0.333333,0.375,0.222222,0.15])
