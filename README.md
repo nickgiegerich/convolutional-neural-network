@@ -8,4 +8,5 @@ special thanks to Dr. Heng_Chieh Chien for guiding me through machine learning/d
 
 ## The Project
 
+the purpose of this project was to get a hands on lesson of working with training neural networks in python. I was giving a data set about microchip properties such as 
 
